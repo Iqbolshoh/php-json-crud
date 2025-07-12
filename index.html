@@ -71,61 +71,107 @@
         const closeModal = document.querySelector('#closeModal');
         const editForm = document.querySelector('#editForm');
         let currentEditId = null;
+        let users = [];
 
-        // Close modal function
+        // DOM elementlari
+        const editNameInput = document.querySelector('#editForm input[name="name"]');
+        const editAgeInput = document.querySelector('#editForm input[name="age"]');
+
+        // Modalni ochish
+        function openEditModal(user) {
+            currentEditId = user.id;
+            editNameInput.value = user.name;
+            editAgeInput.value = user.age;
+            editModal.style.display = 'flex';
+        }
+
+        // Modalni yopish
         function closeEditModal() {
             editModal.style.display = 'none';
             currentEditId = null;
             editForm.reset();
         }
 
-        // Close modal when clicking X
+        // Modalni yopish (X tugmasi va tashqariga bosganda)
         closeModal.addEventListener('click', closeEditModal);
-
-        // Close modal when clicking outside the modal
         editModal.addEventListener('click', function (e) {
             if (e.target === editModal) {
                 closeEditModal();
             }
         });
 
-        // Load users from backend
         function loadUsers() {
             fetch('backend/user/get.php')
                 .then(res => res.json())
                 .then(response => {
-                    console.log(response)
+                    const users = response;
+                    userList.innerHTML = '';
 
-                    response.forEach(user => {
+                    if (users.length === 0) {
+                        userList.innerHTML = `
+                    <li class="empty-state">
+                        <i class="fas fa-user-slash"></i>
+                        <p>Hozircha foydalanuvchilar mavjud emas</p>
+                    </li>
+                `;
+                        return;
+                    }
+
+                    users.forEach(user => {
                         const li = document.createElement('li');
                         li.className = 'user-item';
                         li.innerHTML = `
-                        <div class="user-info">
-                            <div class="user-name">${user.name}</div>
-                            <div class="user-age">${user.age} yosh</div>
-                        </div>
-                        <div class="user-actions">
-                            <button class="btn btn-edit edit-btn" data-id="${user.id}">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-danger delete-btn" data-id="${user.id}">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    `;
+                    <div class="user-info">
+                        <div class="user-name">${user.name}</div>
+                        <div class="user-age">${user.age} yosh</div>
+                    </div>
+                    <div class="user-actions">
+                        <button class="btn btn-edit edit-btn" id="${user.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger delete-btn" id="${user.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
                         userList.appendChild(li);
                     });
+
+                    // Edit tugmalar
+                    document.querySelectorAll('.edit-btn').forEach(btn => {
+                        btn.addEventListener('click', function () {
+                            const userId = this.getAttribute('id');
+                            const user = users.find(u => u.id == userId);
+                            if (user) openEditModal(user);
+                        });
+                    });
+
+                    // Delete tugmalar
+                    document.querySelectorAll('.delete-btn').forEach(btn => {
+                        btn.addEventListener('click', function () {
+                            const userId = this.getAttribute('id');
+                            deleteUser(userId);
+                        });
+                    });
+
                 })
+                .catch(error => {
+                    console.error('Foydalanuvchilarni yuklashda xatolik:', error);
+                    userList.innerHTML = `
+                <li class="empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Foydalanuvchilarni yuklashda xatolik yuz berdi</p>
+                </li>
+            `;
+                });
         }
 
-        loadUsers()
-
+        // Foydalanuvchi qo'shish
         userForm.addEventListener('submit', function (e) {
             e.preventDefault();
 
-            let formData = new FormData(userForm);
-
-            let data = {
+            const formData = new FormData(userForm);
+            const data = {
                 id: Date.now(),
                 name: formData.get('name'),
                 age: parseInt(formData.get('age'))
@@ -140,16 +186,79 @@
             })
                 .then(res => res.json())
                 .then(response => {
-                    if (response.success === true) {
-
+                    if (response.success) {
                         userForm.reset();
+                        loadUsers(); // Ro'yxatni yangilash
                     } else {
-                        alert('Foydalanuvchi qo\'shishda xatolik yuz berdi: ' + response.message);
+                        alert('Foydalanuvchi qo\'shishda xatolik: ' + response.message);
                     }
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    console.error('Xatolik:', error);
+                    alert('Foydalanuvchi qo\'shishda xatolik yuz berdi');
+                });
         });
 
+        // Foydalanuvchini tahrirlash
+        editForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(editForm);
+            const data = {
+                id: currentEditId,
+                name: formData.get('name'),
+                age: parseInt(formData.get('age'))
+            };
+
+            fetch('backend/user/update.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(res => res.json())
+                .then(response => {
+                    if (response.success) {
+                        closeEditModal();
+                        loadUsers(); // Ro'yxatni yangilash
+                    } else {
+                        alert('Tahrirlashda xatolik: ' + response.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Xatolik:', error);
+                    alert('Tahrirlashda xatolik yuz berdi');
+                });
+        });
+
+        // Foydalanuvchini o'chirish
+        function deleteUser(userId) {
+            if (!confirm('Bu foydalanuvchini rostdan ham o\'chirmoqchimisiz?')) return;
+
+            fetch('backend/user/delete.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: userId })
+            })
+                .then(res => res.json())
+                .then(response => {
+                    if (response.success) {
+                        loadUsers(); // Ro'yxatni yangilash
+                    } else {
+                        alert('O\'chirishda xatolik: ' + response.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Xatolik:', error);
+                    alert('O\'chirishda xatolik yuz berdi');
+                });
+        }
+
+        // Dastur ishga tushganda foydalanuvchilarni yuklash
+        loadUsers();
     </script>
 </body>
 
