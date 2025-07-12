@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foydalanuvchilar Boshqaruv Tizimi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --danger-color: #f72585;
+            --success-color: #4cc9f0;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .app-description {
+            color: var(--gray-color);
+            font-size: 1.1rem;
+        }
+
+        .app-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .form-section,
+        .users-section {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            font-size: 1.3rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+
+        .btn-danger:hover {
+            background-color: #d1146a;
+        }
+
+        .btn-edit {
+            background-color: var(--accent-color);
+        }
+
+        .btn-edit:hover {
+            background-color: #3a7bc8;
+        }
+
+        .user-list {
+            list-style: none;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            transition: background 0.3s;
+        }
+
+        .user-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .user-age {
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: var(--gray-color);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #dee2e6;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-color);
+            background: none;
+            border: none;
+        }
+
+        .close-modal:hover {
+            color: var(--dark-color);
+        }
+
+        .modal-title {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .app-content {
+                flex-direction: column;
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Foydalanuvchilar Boshqaruv Tizimi</h1>
+            <p class="app-description">Foydalanuvchilarni qo'shing, tahrirlang va boshqaring</p>
+        </header>
+
+        <div class="app-content">
+            <section class="form-section">
+                <h2 class="section-title"><i class="fas fa-user-plus"></i> Yangi Foydalanuvchi</h2>
+                <form id="userForm">
+                    <div class="form-group">
+                        <label for="name">Ism</label>
+                        <input type="text" id="name" placeholder="Foydalanuvchi ismini kiriting" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="age">Yosh</label>
+                        <input type="number" id="age" placeholder="Foydalanuvchi yoshini kiriting" min="1" max="120"
+                            required>
+                    </div>
+                    <button type="submit" class="btn btn-block">Qo'shish</button>
+                </form>
+            </section>
+
+            <section class="users-section">
+                <h2 class="section-title"><i class="fas fa-users"></i> Foydalanuvchilar Ro'yxati</h2>
+                <ul class="user-list" id="userList">
+                    <li class="empty-state">
+                        <i class="fas fa-user-slash"></i>
+                        <p>Hozircha foydalanuvchilar mavjud emas</p>
+                    </li>
+                </ul>
+            </section>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeModal">&times;</button>
+            <h2 class="modal-title">Foydalanuvchini Tahrirlash</h2>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label for="editName">Ism</label>
+                    <input type="text" id="editName" placeholder="Yangi ism kiriting" required>
+                </div>
+                <div class="form-group">
+                    <label for="editAge">Yosh</label>
+                    <input type="number" id="editAge" placeholder="Yangi yosh kiriting" min="1" max="120" required>
+                </div>
+                <button type="submit" class="btn btn-block btn-edit">Saqlash</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const editModal = document.getElementById('editModal');
+            const closeModal = document.getElementById('closeModal');
+            const editForm = document.getElementById('editForm');
+            let currentEditId = null;
+
+            // Close modal function
+            function closeEditModal() {
+                editModal.style.display = 'none';
+                currentEditId = null;
+                editForm.reset();
+            }
+
+            // Close modal when clicking X
+            closeModal.addEventListener('click', closeEditModal);
+
+            // Close modal when clicking outside the modal
+            editModal.addEventListener('click', function (e) {
+                if (e.target === editModal) {
+                    closeEditModal();
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
