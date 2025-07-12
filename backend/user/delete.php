@@ -31,7 +31,7 @@ if (isset($data['id'])) {
     foreach ($allUsers as $key => $user) {
         if ($user['id'] == $id) {
             unset($allUsers[$key]);
-            file_put_contents('users.json', json_encode(array_values($allUsers)));
+            file_put_contents('users.json', json_encode($allUsers, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
             echo json_encode([
                 'success' => true,
                 'message' => 'Foydalanuvchi muvaffaqiyatli o\'chirildi.'
