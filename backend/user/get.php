@@ -2,7 +2,7 @@
 
 header('Content-Type: application/json; charset=utf-8');
 
-$users = file_get_contents('users.json');
+$users = file_get_contents('../data/users.json');
 
 // Check user role
 

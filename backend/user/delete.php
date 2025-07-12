@@ -24,14 +24,14 @@ if (isset($data['id'])) {
     }
 
     $allUsers = [];
-    if (file_exists('users.json') && filesize('users.json') > 0) {
-        $allUsers = json_decode(file_get_contents('users.json'), true);
+    if (file_exists('../data/users.json') && filesize('../data/users.json') > 0) {
+        $allUsers = json_decode(file_get_contents('../data/users.json'), true);
     }
 
     foreach ($allUsers as $key => $user) {
         if ($user['id'] == $id) {
             unset($allUsers[$key]);
-            file_put_contents('users.json', json_encode($allUsers, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            file_put_contents('../data/users.json', json_encode($allUsers, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
             echo json_encode([
                 'success' => true,
                 'message' => 'Foydalanuvchi muvaffaqiyatli o\'chirildi.'
