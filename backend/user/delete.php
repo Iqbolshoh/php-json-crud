@@ -4,7 +4,6 @@ header('Content-Type: application/json; charset=utf-8');
 
 $data = json_decode(file_get_contents('php://input'), true);
 
-
 if (isset($data['id'])) {
     if (empty($data['id'])) {
         echo json_encode([
