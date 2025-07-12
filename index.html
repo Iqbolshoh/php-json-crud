@@ -66,6 +66,7 @@
 
     <script>
         const userForm = document.querySelector('#userForm');
+        const userList = document.querySelector('#userList');
         const editModal = document.querySelector('#editModal');
         const closeModal = document.querySelector('#closeModal');
         const editForm = document.querySelector('#editForm');
@@ -88,6 +89,36 @@
             }
         });
 
+        // Load users from backend
+        function loadUsers() {
+            fetch('backend/user/get.php')
+                .then(res => res.json())
+                .then(response => {
+                    console.log(response)
+
+                    response.forEach(user => {
+                        const li = document.createElement('li');
+                        li.className = 'user-item';
+                        li.innerHTML = `
+                        <div class="user-info">
+                            <div class="user-name">${user.name}</div>
+                            <div class="user-age">${user.age} yosh</div>
+                        </div>
+                        <div class="user-actions">
+                            <button class="btn btn-edit edit-btn" data-id="${user.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger delete-btn" data-id="${user.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                        userList.appendChild(li);
+                    });
+                })
+        }
+
+        loadUsers()
 
         userForm.addEventListener('submit', function (e) {
             e.preventDefault();
@@ -100,7 +131,7 @@
                 age: parseInt(formData.get('age'))
             };
 
-            fetch('backend/user-add.php', {
+            fetch('backend/user/add.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
