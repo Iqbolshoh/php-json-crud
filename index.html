@@ -22,12 +22,11 @@
                 <form id="userForm">
                     <div class="form-group">
                         <label for="name">Ism</label>
-                        <input type="text" id="name" placeholder="Foydalanuvchi ismini kiriting" required>
+                        <input type="text" name="name" placeholder="Foydalanuvchi ismini kiriting">
                     </div>
                     <div class="form-group">
                         <label for="age">Yosh</label>
-                        <input type="number" id="age" placeholder="Foydalanuvchi yoshini kiriting" min="1" max="120"
-                            required>
+                        <input type="number" name="age" placeholder="Foydalanuvchi yoshini kiriting">
                     </div>
                     <button type="submit" class="btn btn-block">Qo'shish</button>
                 </form>
@@ -54,11 +53,11 @@
                 <input type="hidden" id="editId">
                 <div class="form-group">
                     <label for="editName">Ism</label>
-                    <input type="text" id="editName" placeholder="Yangi ism kiriting" required>
+                    <input type="text" name="name" placeholder="Yangi ism kiriting" required>
                 </div>
                 <div class="form-group">
                     <label for="editAge">Yosh</label>
-                    <input type="number" id="editAge" placeholder="Yangi yosh kiriting" min="1" max="120" required>
+                    <input type="number" name="age" placeholder="Yangi yosh kiriting" min="1" max="120" required>
                 </div>
                 <button type="submit" class="btn btn-block btn-edit">Saqlash</button>
             </form>
@@ -66,29 +65,60 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const editModal = document.getElementById('editModal');
-            const closeModal = document.getElementById('closeModal');
-            const editForm = document.getElementById('editForm');
-            let currentEditId = null;
+        const userForm = document.querySelector('#userForm');
+        const editModal = document.querySelector('#editModal');
+        const closeModal = document.querySelector('#closeModal');
+        const editForm = document.querySelector('#editForm');
+        let currentEditId = null;
 
-            // Close modal function
-            function closeEditModal() {
-                editModal.style.display = 'none';
-                currentEditId = null;
-                editForm.reset();
+        // Close modal function
+        function closeEditModal() {
+            editModal.style.display = 'none';
+            currentEditId = null;
+            editForm.reset();
+        }
+
+        // Close modal when clicking X
+        closeModal.addEventListener('click', closeEditModal);
+
+        // Close modal when clicking outside the modal
+        editModal.addEventListener('click', function (e) {
+            if (e.target === editModal) {
+                closeEditModal();
             }
-
-            // Close modal when clicking X
-            closeModal.addEventListener('click', closeEditModal);
-
-            // Close modal when clicking outside the modal
-            editModal.addEventListener('click', function (e) {
-                if (e.target === editModal) {
-                    closeEditModal();
-                }
-            });
         });
+
+
+        userForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            let formData = new FormData(userForm);
+
+            let data = {
+                id: Date.now(),
+                name: formData.get('name'),
+                age: parseInt(formData.get('age'))
+            };
+
+            fetch('backend/user-add.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(res => res.json())
+                .then(response => {
+                    if (response.success === true) {
+
+                        userForm.reset();
+                    } else {
+                        alert('Foydalanuvchi qo\'shishda xatolik yuz berdi: ' + response.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
     </script>
 </body>
 
